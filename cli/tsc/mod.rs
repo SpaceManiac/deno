@@ -654,6 +654,11 @@ fn op_load_inner(
           media_type = MediaType::Dts;
           Some(Cow::Borrowed(&*module.source_dts))
         }
+        Module::Text(module) => {
+          media_type = MediaType::Unknown;
+          Some(Cow::Borrowed(&*module.source))
+        }
+        Module::Binary(_) => None,
         Module::Npm(_) | Module::Node(_) => None,
         Module::External(module) => {
           if module.specifier.scheme() != "file" {
@@ -892,6 +897,12 @@ fn resolve_graph_specifier_types(
     }
     Some(Module::Wasm(module)) => {
       Ok(Some((module.specifier.clone(), MediaType::Dmts)))
+    }
+    Some(Module::Text(module)) => {
+      Ok(Some((module.specifier.clone(), MediaType::Unknown)))
+    }
+    Some(Module::Binary(module)) => {
+      Ok(Some((module.specifier.clone(), MediaType::Unknown)))
     }
     Some(Module::Npm(module)) => {
       if let Some(npm) = &state.maybe_npm.as_ref() {

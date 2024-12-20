@@ -446,6 +446,8 @@ impl<'a> GraphDisplayContext<'a> {
           Module::Js(module) => module.maybe_cache_info.as_ref(),
           Module::Json(module) => module.maybe_cache_info.as_ref(),
           Module::Wasm(module) => module.maybe_cache_info.as_ref(),
+          Module::Text(module) => module.maybe_cache_info.as_ref(),
+          Module::Binary(module) => module.maybe_cache_info.as_ref(),
           Module::Node(_) | Module::Npm(_) | Module::External(_) => None,
         };
         if let Some(cache_info) = maybe_cache_info {
@@ -469,6 +471,8 @@ impl<'a> GraphDisplayContext<'a> {
               Module::Js(module) => module.size(),
               Module::Json(module) => module.size(),
               Module::Wasm(module) => module.size(),
+              Module::Text(module) => module.size(),
+              Module::Binary(module) => module.size(),
               Module::Node(_) | Module::Npm(_) | Module::External(_) => 0,
             };
             size as f64
@@ -573,6 +577,8 @@ impl<'a> GraphDisplayContext<'a> {
           Module::Js(module) => Some(module.size() as u64),
           Module::Json(module) => Some(module.size() as u64),
           Module::Wasm(module) => Some(module.size() as u64),
+          Module::Text(module) => Some(module.size() as u64),
+          Module::Binary(module) => Some(module.size() as u64),
           Module::Node(_) | Module::Npm(_) | Module::External(_) => None,
         },
       };
@@ -605,6 +611,8 @@ impl<'a> GraphDisplayContext<'a> {
             }
           }
           Module::Json(_)
+          | Module::Text(_)
+          | Module::Binary(_)
           | Module::Npm(_)
           | Module::Node(_)
           | Module::External(_) => {}

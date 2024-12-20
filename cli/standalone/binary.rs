@@ -661,6 +661,12 @@ impl<'a> DenoCompileBinaryWriter<'a> {
         deno_graph::Module::Wasm(m) => {
           (Some(m.source.to_vec()), None, MediaType::Wasm)
         }
+        deno_graph::Module::Text(m) => {
+          (Some(m.source.as_bytes().to_vec()), None, MediaType::Unknown)
+        }
+        deno_graph::Module::Binary(m) => {
+          (Some(m.source.to_vec()), None, MediaType::Unknown)
+        }
         deno_graph::Module::Npm(_)
         | deno_graph::Module::Node(_)
         | deno_graph::Module::External(_) => (None, None, MediaType::Unknown),

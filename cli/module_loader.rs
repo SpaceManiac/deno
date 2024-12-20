@@ -61,12 +61,14 @@ use deno_core::ModuleSpecifier;
 use deno_core::ModuleType;
 use deno_core::RequestedModuleType;
 use deno_core::SourceCodeCacheInfo;
+use deno_graph::BinaryModule;
 use deno_graph::GraphKind;
 use deno_graph::JsModule;
 use deno_graph::JsonModule;
 use deno_graph::Module;
 use deno_graph::ModuleGraph;
 use deno_graph::Resolution;
+use deno_graph::TextModule;
 use deno_graph::WasmModule;
 use deno_runtime::code_cache;
 use deno_runtime::deno_fs::FileSystem;
@@ -592,6 +594,8 @@ impl<TGraphContainer: ModuleGraphContainer>
       Some(Module::Js(module)) => module.specifier.clone(),
       Some(Module::Json(module)) => module.specifier.clone(),
       Some(Module::Wasm(module)) => module.specifier.clone(),
+      Some(Module::Text(module)) => module.specifier.clone(),
+      Some(Module::Binary(module)) => module.specifier.clone(),
       Some(Module::External(module)) => {
         node::resolve_specifier_into_node_modules(
           &module.specifier,
@@ -705,6 +709,24 @@ impl<TGraphContainer: ModuleGraphContainer>
         code: ModuleSourceCode::String(source.clone().into()),
         found_url: specifier.clone(),
         media_type: *media_type,
+      }))),
+      Some(deno_graph::Module::Text(TextModule {
+        source,
+        specifier,
+        ..
+      })) => Ok(Some(CodeOrDeferredEmit::Code(ModuleCodeStringSource {
+        code: ModuleSourceCode::String(source.clone().into()),
+        found_url: specifier.clone(),
+        media_type: MediaType::Unknown,
+      }))),
+      Some(deno_graph::Module::Binary(BinaryModule {
+        source,
+        specifier,
+        ..
+      })) => Ok(Some(CodeOrDeferredEmit::Code(ModuleCodeStringSource {
+        code: ModuleSourceCode::Bytes(source.clone().into()),
+        found_url: specifier.clone(),
+        media_type: MediaType::Unknown,
       }))),
       Some(deno_graph::Module::Js(JsModule {
         source,
