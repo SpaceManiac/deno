@@ -358,7 +358,7 @@ impl ModuleGraphCreator {
 
     self
       .module_graph_builder
-      .build_graph_with_npm_resolution(&mut graph, options)
+      .build_graph_with_npm_resolution(&mut graph, options, None)
       .await?;
 
     if let Some(npm_resolver) = self.npm_resolver.as_managed() {
@@ -484,6 +484,7 @@ impl ModuleGraphBuilder {
     &self,
     graph: &mut ModuleGraph,
     options: CreateGraphOptions<'a>,
+    maybe_attribute_type: Option<&str>,
   ) -> Result<(), AnyError> {
     enum MutLoaderRef<'a> {
       Borrowed(&'a mut dyn Loader),
@@ -599,6 +600,7 @@ impl ModuleGraphBuilder {
           reporter: maybe_file_watcher_reporter,
           resolver: Some(&graph_resolver),
           locker: locker.as_mut().map(|l| l as _),
+          maybe_attribute_type,
         },
         options.npm_caching,
       )

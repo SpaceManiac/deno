@@ -121,6 +121,7 @@ impl ModuleLoadPreparer {
     lib: TsTypeLib,
     permissions: PermissionsContainer,
     content_type_overwrite: Option<&str>,
+    maybe_attribute_type: Option<&str>,
   ) -> Result<(), AnyError> {
     log::debug!("Preparing module load.");
     let _pb_clear_guard = self.progress_bar.clear_guard();
@@ -151,6 +152,7 @@ impl ModuleLoadPreparer {
           loader: Some(&mut cache),
           npm_caching: self.options.default_npm_caching_strategy(),
         },
+        maybe_attribute_type,
       )
       .await?;
 
@@ -416,9 +418,11 @@ impl<TGraphContainer: ModuleGraphContainer>
       // v8 is slower when source maps are present, so we strip them
       code_without_source_map(code_source.code)
     };
-    let module_type = match code_source.media_type {
-      MediaType::Json => ModuleType::Json,
-      MediaType::Wasm => ModuleType::Wasm,
+    let module_type = match (code_source.media_type, requested_module_type.as_str()) {
+      (MediaType::Json, _) => ModuleType::Json,
+      (MediaType::Wasm, _) => ModuleType::Wasm,
+      (_, Some("text")) => ModuleType::Text,
+      (_, Some("binary")) => ModuleType::Binary,
       _ => ModuleType::JavaScript,
     };
 
@@ -924,7 +928,7 @@ impl<TGraphContainer: ModuleGraphContainer> ModuleLoader
     specifier: &ModuleSpecifier,
     _maybe_referrer: Option<String>,
     is_dynamic: bool,
-    _requested_module_type: RequestedModuleType,
+    requested_module_type: RequestedModuleType,
   ) -> Pin<Box<dyn Future<Output = Result<(), AnyError>>>> {
     self.0.shared.in_flight_loads_tracker.increase();
     if self.0.shared.in_npm_pkg_checker.in_npm_package(specifier) {
@@ -972,7 +976,14 @@ impl<TGraphContainer: ModuleGraphContainer> ModuleLoader
           is_dynamic,
           lib,
           permissions,
-          None,
+          match requested_module_type.as_str() {
+            // `with { type: "text" }` or `"binary"` overrides content-type, so a .json file can be manually parsed.
+            Some("text") => Some("text/plain"),
+            Some("binary") => Some("application/octet-stream"),
+            _ => None,
+          },
+          // `with { type: "text" }` or `"binary"`` suppresses JS lexing.
+          requested_module_type.as_str(),
         )
         .await?;
       update_permit.commit();

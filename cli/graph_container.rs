@@ -90,6 +90,7 @@ impl MainModuleGraphContainer {
             _ => None,
           }
         ),
+        None,
       )
       .await?;
     graph_permit.commit();

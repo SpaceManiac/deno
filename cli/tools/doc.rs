@@ -76,6 +76,7 @@ async fn generate_doc_nodes_for_builtin_types(
         npm_resolver: None,
         reporter: None,
         resolver: None,
+        maybe_attribute_type: None,
       },
     )
     .await;

@@ -132,6 +132,7 @@ pub async fn cache_top_level_deps(
           roots: roots.clone(),
           npm_caching: crate::graph_util::NpmCachingStrategy::Manual,
         },
+        None,
       )
       .await?;
     maybe_graph_error = graph_builder.graph_roots_valid(graph, &roots);

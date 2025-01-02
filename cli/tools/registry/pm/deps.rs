@@ -606,6 +606,7 @@ impl DepManager {
         deno_config::deno_json::TsTypeLib::DenoWindow,
         self.permissions_container.clone(),
         None,
+        None,
       )
       .await?;
 
