@@ -933,6 +933,7 @@ impl<TGraphContainer: ModuleGraphContainer> ModuleLoader
     specifier: &ModuleSpecifier,
     _maybe_referrer: Option<String>,
     is_dynamic: bool,
+    _requested_module_type: RequestedModuleType,
   ) -> Pin<Box<dyn Future<Output = Result<(), AnyError>>>> {
     self.0.shared.in_flight_loads_tracker.increase();
     if self.0.shared.in_npm_pkg_checker.in_npm_package(specifier) {
