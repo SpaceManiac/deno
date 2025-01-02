@@ -419,10 +419,12 @@ impl<TGraphContainer: ModuleGraphContainer>
       code_without_source_map(code_source.code)
     };
     let module_type = match (code_source.media_type, requested_module_type.as_str()) {
-      (MediaType::Json, _) => ModuleType::Json,
-      (MediaType::Wasm, _) => ModuleType::Wasm,
+      // Importing as "text" or "binary" overrides the media type. Otherwise
+      // a `.json` extension on a jsonc or json5 file renders it unloadable.
       (_, Some("text")) => ModuleType::Text,
       (_, Some("binary")) => ModuleType::Binary,
+      (MediaType::Json, _) => ModuleType::Json,
+      (MediaType::Wasm, _) => ModuleType::Wasm,
       _ => ModuleType::JavaScript,
     };
 
