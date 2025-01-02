@@ -80,7 +80,16 @@ impl MainModuleGraphContainer {
         false,
         self.cli_options.ts_type_lib_window(),
         self.root_permissions.clone(),
-        ext_overwrite,
+        ext_overwrite.and_then(|ext|
+          // Convert command-line --ext ts/tsx/js/jsx to an internal MIME type.
+          match ext.as_str() {
+            "ts" => Some("text/typescript"),
+            "tsx" => Some("text/tsx"),
+            "js" => Some("text/javascript"),
+            "jsx" => Some("text/jsx"),
+            _ => None,
+          }
+        ),
       )
       .await?;
     graph_permit.commit();
